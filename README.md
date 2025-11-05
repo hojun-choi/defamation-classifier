@@ -1,5 +1,5 @@
-```
 # defamation-classifier
+```
 
 명예훼손 **이진 분류** 서비스를 위한 풀스택 템플릿입니다.
 백엔드는 **Spring Boot 3 (Java 17, Gradle)**, 프런트는 **Vue + Vite**, DB는 **MySQL 8**을 사용합니다.
