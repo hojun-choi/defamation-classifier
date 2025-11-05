@@ -1,0 +1,70 @@
+/* ===== 강제 전역 리셋 ===== */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 링크 밑줄 전역 제거 (모든 상태) */
+a, a:visited, a:active, a:hover, a:focus {
+  text-decoration: none !important;
+  -webkit-text-decoration: none !important;
+  text-decoration-thickness: 0 !important;
+  outline: none;
+}
+
+/* 페이지 기본 설정 */
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.92);
+  background-color: #0b1221;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 가로 스크롤 차단 + 스크롤바로 인한 좌우 흔들림 방지 */
+html { scrollbar-gutter: stable both-edges; }
+body { min-height: 100vh; overflow-x: hidden; background: #0b1221; }
+
+/* Vite 기본 #app 여백 제거 */
+#app {
+  width: 100%;
+  max-width: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: initial;
+}
+
+/* 버튼 기본 */
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover { border-color: #6474ff; }
+button:focus, button:focus-visible { outline: 4px auto -webkit-focus-ring-color; }
+
+/* 라이트 모드 대응(선택) */
+@media (prefers-color-scheme: light) {
+  :root { color: #213547; background-color: #ffffff; }
+  body { background:#ffffff; color:#213547; }
+}

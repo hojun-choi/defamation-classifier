@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 기본 파비콘: 원본 유지 -->
+    <link id="favicon" rel="icon" type="image/svg+xml" href="/law.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>명예훼손 AI</title>
+  </head>
+  <body style="background:#0b0f17;">
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+
+    <!-- 다크모드에서만 파비콘을 흰색으로 치환 -->
+    <script>
+      (async () => {
+        const prefersDark = matchMedia('(prefers-color-scheme: dark)');
+
+        async function setFaviconForTheme() {
+          const link = document.getElementById('favicon');
+          if (!link) return;
+
+          // 다크모드면 law.svg를 불러와서 색을 흰색으로 치환
+          if (prefersDark.matches) {
+            try {
+              const svg = await fetch('/law.svg').then(r => r.text());
+
+              // 기존 fill/stroke를 흰색으로 바꾸고, 없으면 루트에 기본값 넣기
+              const whitened = svg
+                .replace(/fill="[^"]*"/g, 'fill="#fff"')
+                .replace(/stroke="[^"]*"/g, 'stroke="#fff"')
+                .replace(/<svg\b([^>]*)>/, (m, attrs) => {
+                  const hasFill = /fill="/.test(attrs);
+                  const hasStroke = /stroke="/.test(attrs);
+                  return `<svg${attrs}${
+                    hasFill ? '' : ' fill="#fff"'
+                  }${hasStroke ? '' : ' stroke="#fff"'}>`;
+                });
+
+              const dataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(whitened);
+              link.href = dataUrl;
+            } catch (e) {
+              console.error('favicon swap failed:', e);
+              // 실패하면 원본 유지
+              link.href = '/law.svg';
+            }
+          } else {
+            // 라이트 모드면 원본 사용
+            link.href = '/law.svg';
+          }
+        }
+
+        // 초기 적용
+        await setFaviconForTheme();
+        // 테마가 바뀔 때도 적용
+        prefersDark.addEventListener?.('change', setFaviconForTheme);
+      })();
+    </script>
+  </body>
+</html>

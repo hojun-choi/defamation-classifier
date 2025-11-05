@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/defamation?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: defamation_local   # root 쓸 거면 root로 바꾸세요
+    password: devpass            # root 비번으로 바꾸세요
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+
+app:
+  cors:
+    allowed-origins: "http://localhost:5173"
+  model:
+    adapter: mock
+  vllm:
+    base-url: "http://localhost:8000/v1"
+    api-key: ""
