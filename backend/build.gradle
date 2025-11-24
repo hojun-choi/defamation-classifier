@@ -9,14 +9,10 @@ version = '0.0.1-SNAPSHOT'
 description = 'defamation-classifier backend'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+    toolchain { languageVersion = JavaLanguageVersion.of(17) }
 }
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 dependencies {
     // MVC + Validation + JPA
@@ -24,23 +20,29 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    // WebClient, SSE 등 사용을 위해 WebFlux 추가(서버 스택은 기본적으로 MVC가 선택됨)
+    // (필요하면 유지) WebClient/SSE 등
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    // DB
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.flywaydb:flyway-mysql'
+    // DB 드라이버
     runtimeOnly 'com.mysql:mysql-connector-j'
 
-    // Swagger UI (springdoc - MVC용)
+    // Swagger UI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    compileOnly "org.projectlombok:lombok:1.18.36"
+    annotationProcessor "org.projectlombok:lombok:1.18.36"
+
+    testCompileOnly "org.projectlombok:lombok:1.18.36"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.36"
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
+tasks.named('test') { useJUnitPlatform() }
+
+springBoot {
+    mainClass = "com.defamation.backend.BackendApplication"
 }

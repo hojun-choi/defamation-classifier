@@ -1,14 +1,18 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/defamation?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
-    username: defamation_local   # root 쓸 거면 root로 바꾸세요
-    password: devpass            # root 비번으로 바꾸세요
+    username: defamation_local   # root 쓰면 여기 root
+    password: devpass            # root 비번
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none             # 엔티티로 테이블 만들지 않음(권장)
     open-in-view: false
+  sql:
+    init:
+      mode: always               # resources/schema.sql 자동 실행
+      # locations 기본값: classpath:schema.sql, classpath:data.sql
   flyway:
-    enabled: true
+    enabled: false               # 완전히 끔 (아예 블록 제거해도 됨)
 
 server:
   port: 8080
