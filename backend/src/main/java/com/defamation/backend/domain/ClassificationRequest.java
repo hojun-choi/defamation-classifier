@@ -19,37 +19,43 @@ public class ClassificationRequest {
 
     // input
     @Lob
-    @Column(name="problem_situation", nullable=false, columnDefinition="LONGTEXT")
+    @Column(name = "problem_situation", columnDefinition = "LONGTEXT", nullable = false)
     private String problemSituation;
 
-    // model outputs (RAW -> 매핑 결과)
-    @Column(name="case_names", columnDefinition="JSON")
-    private String caseNames;   // JSON string (죄명 리스트)
+    // ✅ 어떤 모델로 분류했는지 (FK models.id)
+    @Column(name = "model_id", nullable = false)
+    private Long modelId;
 
-    @Column(name="sentence_type")
-    private String sentenceType; // 형종
+    // output
+    @Lob
+    @Column(name = "case_names", columnDefinition = "json")
+    private String caseNames; // JSON 문자열로 저장
 
-    @Column(name="sentence_value")
-    private Long sentenceValue;  // 벌금액(숫자)
+    @Column(name = "sentence_type", length = 50)
+    private String sentenceType;
 
-    @Column(name="sentence_suspension")
-    private Integer sentenceSuspension; // 집유 기간 월
+    @Column(name = "sentence_value")
+    private Long sentenceValue;
+
+    @Column(name = "sentence_suspension")
+    private Integer sentenceSuspension;
 
     @Lob
-    @Column(name="sentence_additional_order", columnDefinition="LONGTEXT")
-    private String sentenceAdditionalOrder; // 추가 조건
+    @Column(name = "sentence_additional_order", columnDefinition = "LONGTEXT")
+    private String sentenceAdditionalOrder;
 
     @Lob
-    @Column(name="sentence_reason", columnDefinition="LONGTEXT")
-    private String sentenceReason;          // 양형 이유
+    @Column(name = "sentence_reason", columnDefinition = "LONGTEXT")
+    private String sentenceReason;
 
-    @Column(name="sentence_judgment")
-    private String sentenceJudgment;        // 판단
+    @Column(name = "sentence_judgment", length = 20)
+    private String sentenceJudgment;
 
     @Builder.Default
-    @Column(name="is_deleted", nullable=false)
+    @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
-    @Column(name="created_at", insertable=false, updatable=false)
+    // DB default CURRENT_TIMESTAMP 사용
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 }

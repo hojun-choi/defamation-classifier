@@ -17,9 +17,34 @@
         <div class="card-bd">
           <div class="field">
             <label class="label">Model</label>
-            <select v-model="modelVersion" class="control">
-              <option v-for="m in models" :key="m">{{ m }}</option>
+
+            <select
+              v-model.number="selectedModelId"
+              class="control select"  
+              :disabled="modelsLoading || !!modelsError"
+            >
+              <option v-if="modelsLoading" disabled value="">
+                모델 불러오는 중...
+              </option>
+              <option v-else-if="modelsError" disabled value="">
+                모델 불러오기 실패
+              </option>
+              <option v-else-if="models.length === 0" disabled value="">
+                활성화된 모델이 없습니다.
+              </option>
+
+              <option
+                v-for="m in models"
+                :key="m.id"
+                :value="m.id"
+              >
+                {{ m.displayName }}
+              </option>
             </select>
+
+            <div v-if="modelsError" class="muted" style="margin-top:6px;">
+              {{ modelsError }}
+            </div>
           </div>
 
           <div class="field">
@@ -59,10 +84,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { fetchModels, classifyText } from '@/api/defamation'
 
-const models = ref(['mT5-Base', 'mT5-Large', 'Qwen2.5', 'KoGPT2'])
-const modelVersion = ref(models.value[0])
+const models = ref([])
+const selectedModelId = ref(null)
+
+const modelsLoading = ref(false)
+const modelsError = ref('')
 
 const text = ref('')
 const loading = ref(false)
@@ -81,16 +110,87 @@ const verdictView = computed(() => {
   return { text: v, cls: 'other' }
 })
 
+const selectedModel = computed(() =>
+  models.value.find(m => m.id === selectedModelId.value) || null
+)
+
+onMounted(async () => {
+  modelsLoading.value = true
+  modelsError.value = ''
+  try {
+    const data = await fetchModels()
+    const list = Array.isArray(data) ? data : (data?.content ?? [])
+    const normalized = list
+      .filter(m => m.enabled === 1 || m.enabled === true || m.enabled == null)
+      .map(m => ({
+        id: m.id,
+        name: m.name,
+        displayName: m.display_name || m.displayName || m.name
+      }))
+
+    models.value = normalized
+
+    if (models.value.length > 0) {
+      selectedModelId.value = models.value[0].id
+    } else {
+      modelsError.value = '활성화된 모델이 없습니다.'
+    }
+  } catch (e) {
+    console.error('[fetchModels failed]', e)
+    modelsError.value =
+      e?.response?.data?.message ||
+      e?.response?.data?.error ||
+      e?.message ||
+      '모델 목록을 불러오지 못했습니다.'
+  } finally {
+    modelsLoading.value = false
+  }
+})
+
 async function onClassify () {
-  // TODO: 네 기존 classify 로직 유지
+  if (!text.value.trim() || loading.value) return
+  if (!selectedModel.value) {
+    result.value = { error: true, message: '모델을 선택하세요.' }
+    return
+  }
+
+  loading.value = true
+  showOverlay.value = true
+  try {
+    const payload = {
+      inputs: text.value,
+      modelId: selectedModel.value.id,
+    }
+
+    const res = await classifyText(payload)
+
+    if (typeof res === 'string') {
+      try { result.value = JSON.parse(res) }
+      catch { result.value = { raw: res } }
+    } else if (res && typeof res.generated_text === 'string') {
+      try { result.value = JSON.parse(res.generated_text) }
+      catch { result.value = { raw: res.generated_text } }
+    } else {
+      result.value = res
+    }
+  } catch (e) {
+    const msg =
+      e?.response?.data?.message ||
+      e?.response?.data?.error ||
+      e?.message ||
+      'unknown error'
+    result.value = { error: true, message: msg }
+    console.error('[classify failed]', e)
+  } finally {
+    loading.value = false
+    showOverlay.value = false
+  }
 }
+
 function onClear () { text.value = ''; result.value = null }
 </script>
 
 <style scoped>
-/* =========================================================
-   Responsive scale + centered container
-   ========================================================= */
 .page{
   --fs-base: clamp(13px, 0.65vw + 0.7rem, 18px);
   --pad-hd: clamp(12px, 0.9vw + 6px, 22px);
@@ -156,8 +256,29 @@ function onClear () { text.value = ''; result.value = null }
   font-size:1rem;
 }
 
+/* ✅ select 전용 커스텀 화살표 */
+.control.select{
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* 오른쪽 여백 넉넉히 줘서 화살표가 살짝 왼쪽에 위치 */
+  padding-right: 52px;
+
+  /* 커스텀 화살표(svg) */
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'>\
+<polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+
+  /* ✅ 너무 오른쪽 붙어있던 걸 왼쪽으로 조금 이동 */
+  background-position: right 16px center;
+
+  /* ✅ 화살표 크기 키움 */
+  background-size: 20px 20px;
+}
+
 .textarea{
-  /* 큰 화면에선 더 시원하게 */
   min-height: clamp(180px, 22vh, 320px);
   resize: vertical;
   line-height: 1.5;
@@ -211,4 +332,17 @@ function onClear () { text.value = ''; result.value = null }
   font-size:1rem;
   line-height:1.5;
 }
+
+/* 로딩 오버레이 */
+.overlay{
+  position:fixed; inset:0; background:rgba(10,13,20,.65);
+  display:flex; align-items:center; justify-content:center; z-index:50;
+}
+.overlay-video{
+  width:min(520px, 86vw);
+  border-radius:18px;
+  box-shadow:0 20px 80px rgba(0,0,0,.55);
+}
+.fade-enter-active,.fade-leave-active{ transition:.18s; }
+.fade-enter-from,.fade-leave-to{ opacity:0; }
 </style>

@@ -1,3 +1,9 @@
 spring:
   profiles:
     default: local
+
+defamation:
+  model-endpoints:
+    1: "https://chasmed-sariah-rainily.ngrok-free.dev/predict"
+    # 나중에 추가할 modelId=3
+    # 3: "https://<OTHER>.ngrok-free.dev/predict"

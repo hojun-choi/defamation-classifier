@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,22 +15,26 @@ import java.util.List;
 public class ClassificationRequestDto {
 
     private Long id;
+
     private String problemSituation;
+    private Long modelId;
 
     private List<String> caseNames;
 
     private String sentenceType;
-    private Long sentenceValue;          // 숫자
-    private Integer sentenceSuspension;  // 월
-
+    private Long sentenceValue;
+    private Integer sentenceSuspension;
     private String sentenceAdditionalOrder;
     private String sentenceReason;
     private String sentenceJudgment;
+
+    private LocalDateTime createdAt;
 
     public static ClassificationRequestDto from(ClassificationRequest r, ObjectMapper om) {
         return ClassificationRequestDto.builder()
                 .id(r.getId())
                 .problemSituation(r.getProblemSituation())
+                .modelId(r.getModelId())
                 .caseNames(parseList(om, r.getCaseNames()))
                 .sentenceType(r.getSentenceType())
                 .sentenceValue(r.getSentenceValue())
@@ -37,6 +42,7 @@ public class ClassificationRequestDto {
                 .sentenceAdditionalOrder(r.getSentenceAdditionalOrder())
                 .sentenceReason(r.getSentenceReason())
                 .sentenceJudgment(r.getSentenceJudgment())
+                .createdAt(r.getCreatedAt())
                 .build();
     }
 

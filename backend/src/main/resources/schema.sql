@@ -20,13 +20,16 @@ CREATE TABLE IF NOT EXISTS models (
 --      sentence_additional_order <- 형량.추가_조건
 --      sentence_reason         <- 양형이유
 --      sentence_judgment       <- 판단 (유죄/무죄)
---  - label: defamationN(-1/0/1) 결과 저장
+--      model_id               <- models.id (외래키)
 -- =========================================================
 CREATE TABLE IF NOT EXISTS classification_requests (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
 
   -- input
   problem_situation LONGTEXT NOT NULL,
+
+  -- 어떤 모델로 분류했는지
+  model_id BIGINT NOT NULL,
 
   case_names JSON NULL,                 -- ["정보통신망...", ...]  (죄명)
 
@@ -41,12 +44,18 @@ CREATE TABLE IF NOT EXISTS classification_requests (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   KEY idx_cls_created_at (created_at),
+  KEY idx_cls_model_id (model_id),
 
   FULLTEXT INDEX ftx_cls_text (
     problem_situation,
     sentence_reason,
     sentence_additional_order
-  ) WITH PARSER ngram
+  ) WITH PARSER ngram,
+
+  CONSTRAINT fk_cls_model
+    FOREIGN KEY (model_id) REFERENCES models(id)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
