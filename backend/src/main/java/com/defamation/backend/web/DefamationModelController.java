@@ -1,7 +1,7 @@
 package com.defamation.backend.web;
 
 import com.defamation.backend.domain.Model;
-import com.defamation.backend.repository.ModelRepository;
+import com.defamation.backend.service.DefamationModelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DefamationModelController {
 
-    private final ModelRepository modelRepository;
+    private final DefamationModelService defamationModelService;
 
     /**
      * GET /api/v1/defamation/models
@@ -20,6 +20,6 @@ public class DefamationModelController {
      */
     @GetMapping("/models")
     public List<Model> getModels() {
-        return modelRepository.findByEnabledTrueOrderByIdAsc();
+        return defamationModelService.getEnabledModels();
     }
 }
