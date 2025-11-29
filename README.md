@@ -196,7 +196,7 @@ Spring(8080)에서 프론트+백엔드를 함께 서빙하는 상태에서,
 pip install pyngrok python-dotenv
 ```
 
-#### 7-2. `.env` 설정
+#### 7-2. `.env2` 설정
 
 프로젝트 루트(`defamation-classifier/`)에 `.env2` 파일을 생성하고 다음 내용을 작성합니다.
 
