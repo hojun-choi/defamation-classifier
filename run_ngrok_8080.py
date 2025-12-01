@@ -11,11 +11,11 @@ env_path = os.path.join(BASE_DIR, ".env2")
 load_dotenv(env_path)
 
 NGROK_AUTHTOKEN = os.getenv("NGROK_AUTHTOKEN")
-NGROK_HOSTNAME = os.getenv("NGROK_HOSTNAME")  # 선택 사항
+NGROK_HOSTNAME = os.getenv("NGROK_HOSTNAME")  # 선택 사항 (예: domain.ngrok-free.dev)
 APP_PORT = int(os.getenv("APP_PORT", "8080"))  # 기본 8080
 
 if not NGROK_AUTHTOKEN:
-    raise RuntimeError("NGROK_AUTHTOKEN 값이 .env 에 없습니다.")
+    raise RuntimeError("NGROK_AUTHTOKEN 값이 .env2 에 없습니다.")
 
 # ==========================================
 # 2. ngrok 설정 (토큰 세팅 + 기존 터널 종료)
@@ -34,13 +34,15 @@ ngrok.kill()
 connect_kwargs = {}
 
 if NGROK_HOSTNAME:
-    # ngrok에 예약된 hostname이 있다면 사용
-    # (hostname 옵션은 ngrok/pyngrok에서 커스텀 도메인에 사용됨)
-    connect_kwargs["options"] = {"hostname": NGROK_HOSTNAME}
-    print(f"🌐 예약 호스트네임로 터널 시도: {NGROK_HOSTNAME}")
+    # 수정된 부분: "options" 딕셔너리 없이 바로 키워드 인자로 전달합니다.
+    # 만약 "hostname"으로 작동하지 않는 경우(최신 무료 도메인 등), 
+    # 아래 키를 "domain"으로 변경해보세요. (connect_kwargs["domain"] = ...)
+    connect_kwargs["hostname"] = NGROK_HOSTNAME
+    print(f"🌐 예약 호스트네임으로 터널 시도: {NGROK_HOSTNAME}")
 else:
     print("🌐 호스트네임 미설정 → 랜덤 ngrok 주소로 터널 생성")
 
+# **connect_kwargs를 통해 hostname이 바로 connect 함수로 전달됩니다.
 tunnel = ngrok.connect(APP_PORT, "http", **connect_kwargs)
 public_url = tunnel.public_url
 
